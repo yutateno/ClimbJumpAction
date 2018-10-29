@@ -8,6 +8,7 @@ protected:
 	// 位置について
 	VECTOR preArea;	// 移動前の直前のキャラ位置
 	float angle;	// アングル
+	VECTOR nextArea;
 
 
 	// 動きに関して

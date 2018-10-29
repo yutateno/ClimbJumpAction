@@ -120,9 +120,9 @@ void BasicCreature::ActorHit(int stageHandle)
 		if (hitDim.Dim[i].Normal.y < 0.001f && hitDim.Dim[i].Normal.y > -0.001f)
 		{
 			// 壁だとしてもキャラクターの足より少し上を調べる
-			if (hitDim.Dim[i].Position[0].y > area.y + modelHeight + 50.0f
-				|| hitDim.Dim[i].Position[1].y > area.y + modelHeight + 50.0f
-				|| hitDim.Dim[i].Position[2].y > area.y + modelHeight + 50.0f)
+			if (hitDim.Dim[i].Position[0].y > area.y + 5.0f
+				|| hitDim.Dim[i].Position[1].y > area.y + 5.0f
+				|| hitDim.Dim[i].Position[2].y > area.y + 5.0f)
 			{
 				// 最大になるまで保存する
 				if (wallNum < 64)
@@ -143,6 +143,100 @@ void BasicCreature::ActorHit(int stageHandle)
 		}
 	}
 
+	// 床判定
+	if (floorNum != 0)
+	{
+		fallCount++;			// 浮いているとする
+
+		if (!jumpUpNow)
+		{
+			hitFlag = false;		// 当たってないとする
+
+			maxYHit = 0.0f;			// 初期化する
+
+			for (int i = 0; i != floorNum; ++i)
+			{
+				mainPoly = floorPoly[i];			// 今調べるポリゴン情報を渡す
+
+				if (jumpNow)
+				{
+					lineResult = HitCheck_Line_Triangle(VAdd(area, VGet(0.0f, modelHeight, 0.0f)), VAdd(area, VGet(0.0f, -5.0f, 0.0f)), mainPoly->Position[0], mainPoly->Position[1], mainPoly->Position[2]);
+				}
+				else
+				{
+					lineResult = HitCheck_Line_Triangle(VAdd(area, VGet(0.0f, modelHeight, 0.0f)), VAdd(area, VGet(0.0f, -20.0f, 0.0f)), mainPoly->Position[0], mainPoly->Position[1], mainPoly->Position[2]);
+				}
+
+				// 当たってなかったら何もしない
+				if (!lineResult.HitFlag)
+				{
+					continue;
+				}
+
+				// 既に当たったポリゴンがあって今まで検出したものより低かったら何もしない
+				if (hitFlag && maxYHit > lineResult.Position.y)
+				{
+					continue;
+				}
+
+				// 接触したY座標を保持する
+				maxYHit = lineResult.Position.y;
+				hitFlag = true;
+			}
+
+			// 床に当たったかどうかで処理
+			if (hitFlag)
+			{
+				area.y = maxYHit;
+
+				fallCount = 0;
+			}
+		}
+		else
+		{
+			minYHit = 0.0f;
+
+			hitFlag = false;
+
+			for (int i = 0; i != floorNum; ++i)
+			{
+				mainPoly = floorPoly[i];			// 今調べるポリゴン情報を渡す
+
+				lineResult = HitCheck_Line_Triangle(area, VAdd(area, VGet(0.0f, modelHeight, 0.0f)), mainPoly->Position[0], mainPoly->Position[1], mainPoly->Position[2]);
+
+				// 当たってなかったら何もしない
+				if (!lineResult.HitFlag)
+				{
+					continue;
+				}
+
+				// 既に当たったポリゴンがあって今まで検出したものより低かったら何もしない
+				if (hitFlag && minYHit < lineResult.Position.y)
+				{
+					continue;
+				}
+
+				// 接触したY座標を保持する
+				minYHit = lineResult.Position.y;
+				hitFlag = true;
+			}
+
+			// 床に当たったかどうかで処理
+			if (hitFlag)
+			{
+				area.y = minYHit - modelHeight;
+
+				jumpPower = 0.0f;
+
+				jumpUpNow = false;
+			}
+		}
+	}
+	else	// 床に触れていない
+	{
+		area.y -= 0.75f;
+	}
+
 	// 壁判定
 	if (wallNum != 0)
 	{
@@ -158,7 +252,7 @@ void BasicCreature::ActorHit(int stageHandle)
 				mainPoly = wallPoly[i];			// 今の調べるポリゴン情報を渡す
 
 				// 当たっているかどうかを調べる
-				if (HitCheck_Capsule_Triangle(area, VAdd(area, VGet(0.0f, modelHeight, 0.0f)), modelWigth, mainPoly->Position[0], mainPoly->Position[1], mainPoly->Position[2]) == false)
+				if (HitCheck_Capsule_Triangle(VAdd(area, VGet(0.0f, modelHeight, 0.0f)), VAdd(area, VGet(0.0f, modelHeight, 0.0f)), modelWigth, mainPoly->Position[0], mainPoly->Position[1], mainPoly->Position[2]) == false)
 				{
 					continue;			// 当たっていないので次！
 				}
@@ -171,8 +265,9 @@ void BasicCreature::ActorHit(int stageHandle)
 					mainPoly = wallPoly[j];			// 今の調べるポリゴン情報を渡す
 
 					// 当たっているかどうかを調べる
-					if (HitCheck_Capsule_Triangle(area, VAdd(area, VGet(0.0f, modelHeight, 0.0f)), modelWigth, mainPoly->Position[0], mainPoly->Position[1], mainPoly->Position[2]) == TRUE)
+					if (HitCheck_Capsule_Triangle(VAdd(area, VGet(0.0f, modelHeight, 0.0f)), VAdd(area, VGet(0.0f, modelHeight, 0.0f)), modelWigth, mainPoly->Position[0], mainPoly->Position[1], mainPoly->Position[2]) == TRUE)
 					{
+						jumpUpNow = false;
 						break;			// 当たっていたので抜ける
 					}
 				}
@@ -246,100 +341,6 @@ void BasicCreature::ActorHit(int stageHandle)
 				}
 			}
 		}
-	}
-
-	// 床判定
-	if (floorNum != 0)
-	{
-		fallCount++;			// 浮いているとする
-
-		if (jumpUpNow)
-		{
-			minYHit = 0.0f;
-
-			hitFlag = false;
-
-			for (int i = 0; i != floorNum; ++i)
-			{
-				mainPoly = floorPoly[i];			// 今調べるポリゴン情報を渡す
-
-				lineResult = HitCheck_Line_Triangle(area, VAdd(area, VGet(0.0f, modelHeight, 0.0f)), mainPoly->Position[0], mainPoly->Position[1], mainPoly->Position[2]);
-
-				// 当たってなかったら何もしない
-				if (!lineResult.HitFlag)
-				{
-					continue;
-				}
-
-				// 既に当たったポリゴンがあって今まで検出したものより低かったら何もしない
-				if (hitFlag && minYHit < lineResult.Position.y)
-				{
-					continue;
-				}
-
-				// 接触したY座標を保持する
-				minYHit = lineResult.Position.y;
-				hitFlag = true;
-			}
-
-			// 床に当たったかどうかで処理
-			if (hitFlag)
-			{
-				area.y = minYHit - modelHeight;
-
-				jumpPower = 0.0f;
-
-				jumpUpNow = false;
-			}
-		}
-		else
-		{
-			hitFlag = false;		// 当たってないとする
-
-			maxYHit = 0.0f;			// 初期化する
-
-			for (int i = 0; i != floorNum; ++i)
-			{
-				mainPoly = floorPoly[i];			// 今調べるポリゴン情報を渡す
-
-				if (jumpNow)
-				{
-					lineResult = HitCheck_Line_Triangle(VAdd(area, VGet(0.0f, modelHeight, 0.0f)), VAdd(area, VGet(0.0f, -5.0f, 0.0f)), mainPoly->Position[0], mainPoly->Position[1], mainPoly->Position[2]);
-				}
-				else
-				{
-					lineResult = HitCheck_Line_Triangle(VAdd(area, VGet(0.0f, modelHeight, 0.0f)), VAdd(area, VGet(0.0f, -20.0f, 0.0f)), mainPoly->Position[0], mainPoly->Position[1], mainPoly->Position[2]);
-				}
-
-				// 当たってなかったら何もしない
-				if (!lineResult.HitFlag)
-				{
-					continue;
-				}
-
-				// 既に当たったポリゴンがあって今まで検出したものより低かったら何もしない
-				if (hitFlag && maxYHit > lineResult.Position.y)
-				{
-					continue;
-				}
-
-				// 接触したY座標を保持する
-				maxYHit = lineResult.Position.y;
-				hitFlag = true;
-			}
-
-			// 床に当たったかどうかで処理
-			if (hitFlag)
-			{
-				area.y = maxYHit;
-
-				fallCount = 0;
-			}
-		}
-	}
-	else	// 床に触れていない
-	{
-		area.y -= 0.75f;
 	}
 
 	// 検出した情報を解放する
