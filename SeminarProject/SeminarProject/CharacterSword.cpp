@@ -273,7 +273,7 @@ void CharacterSword::JumpProcess(unsigned __int8 controllNumber)
 		
 		
 		// ジャンプにて最頂点に到達したら
-		if (jumpPower <= 0.0f)
+		if (jumpPower <= flyJumpPower / 2.0f)
 		{
 			jumpUpNow = false;			// 落下に切り替える
 
@@ -281,20 +281,8 @@ void CharacterSword::JumpProcess(unsigned __int8 controllNumber)
 			if (fallCount <= 1)
 			{
 				jumpNow = false;
-				jumpPower = 0;
+				jumpPower = 0.0f;
 				jumpUpNow = false;
-			}
-		}
-		else
-		{
-			// 地面に触れてなかったら
-			if (fallCount > 1)
-			{
-				jumpUpNow = false;		// 階段から落ちてる
-			}
-			else
-			{
-				jumpUpNow = true;		// 通常ジャンプにてジャンプした
 			}
 		}
 	}
@@ -479,7 +467,6 @@ void CharacterSword::Process(const unsigned __int8 controllNumber, const float g
 
 	// モーションのプロセス
 	AnimProcess();
-
 
 	// 階段のあたり判定
 	for (int i = 0; i != 10; ++i)

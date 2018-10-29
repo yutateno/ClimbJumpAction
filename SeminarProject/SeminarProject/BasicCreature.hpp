@@ -14,6 +14,9 @@ protected:
 	float walkSpeed;	// 移動スピード
 	float animSpeed;	// モーションスピード
 	int fallCount;		// 当たり判定モデル全てから落ちているかどうか
+	bool jumpNow;		// 飛んでいるかどうか
+	bool jumpUpNow;		// 上に飛んでいる
+	float jumpPower;	// ジャンプ力
 
 
 	// モデルに関して
@@ -48,6 +51,7 @@ private:
 	int floorNum;						// 判定する床の数
 	bool hitFlag;						// 当たっているかどうか
 	float maxYHit;						// 当たっているY座標の最大
+	float minYHit;						// 当たっているY座標の最小
 	MV1_COLL_RESULT_POLY_DIM hitDim;			// 周囲のポリゴンを代入する構造体
 	MV1_COLL_RESULT_POLY* wallPoly[2048];		// 壁用のポリゴンの構造体
 	MV1_COLL_RESULT_POLY* floorPoly[2048];		// 床用のポリゴンの構造体

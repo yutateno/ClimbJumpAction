@@ -39,9 +39,6 @@ private:
 
 
 	// ƒWƒƒƒ“ƒv‚ÉŠÖ‚µ‚Ä
-	bool jumpNow;
-	bool jumpUpNow;
-	float jumpPower;
 	float gravity;
 	float flyJumpPower;
 	float fallJumpPower;
