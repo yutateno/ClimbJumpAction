@@ -98,6 +98,8 @@ BasicObject::BasicObject(const int collStageHandle)
 	MV1SetPosition(stageHandle, VGet(0.0f, 0.0f, 0.0f));				// ステージの座標を更新
 	MV1SetFrameVisible(stageHandle, -1, false);							// ステージを描画させない（でもどうせDraw呼ばないからこれ意味ない気もする）
 	MV1RefreshCollInfo(stageHandle, -1);								// ステージを描画させない（でもどうせDraw呼ばないからこれ意味ない気もする）
+
+	notViewCount = 0;
 }
 
 
@@ -135,5 +137,17 @@ void BasicObject::Draw()
 	if (!CheckCameraViewClip(area) && !CheckCameraViewClip(VAdd(area, VGet(0.0f, modelHeight, 0.0f))) && !CheckCameraViewClip(VAdd(area, VGet(0.0f, modelHeight / 2.0f, 0.0f))))
 	{
 		MV1DrawModel(modelHandle);
+		if (notViewCount != 0)
+		{
+			notViewCount = 0;
+		}
+	}
+	else
+	{
+		notViewCount++;
+		if (notViewCount <= 50)
+		{
+			MV1DrawModel(modelHandle);
+		}
 	}
 }

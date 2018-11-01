@@ -190,6 +190,8 @@ void BasicCreature::ActorHit(int stageHandle)
 				area.y = maxYHit;
 
 				fallCount = 0;
+
+				jumpNow = false;
 			}
 		}
 		else

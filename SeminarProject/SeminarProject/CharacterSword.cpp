@@ -280,7 +280,6 @@ void CharacterSword::JumpProcess(unsigned __int8 controllNumber)
 			// 地面に触れたら
 			if (fallCount <= 1)
 			{
-				jumpNow = false;
 				jumpPower = 0.0f;
 				jumpUpNow = false;
 			}
@@ -388,7 +387,7 @@ CharacterSword::CharacterSword(const int modelHandle, const int collStageHandle,
 	jumpUpNow = false;
 	jumpPower = 0.0f;
 	gravity = 0.75f;
-	flyJumpPower = 30.0f;
+	flyJumpPower = 50.0f;
 	fallJumpPower = 3.0f;
 
 
@@ -486,7 +485,7 @@ void CharacterSword::Process(const unsigned __int8 controllNumber, const float g
 	// ステージのあたり判定
 	StageHit();
 
-
+	printfDx("%d\n", jumpNow);
 
 	// 第二引数の回転角度をセット
 	MV1SetRotationXYZ(modelHandle, VGet(0.0f, angle + direXAngle + direZAngle, 0.0f));

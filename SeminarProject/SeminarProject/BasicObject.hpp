@@ -27,6 +27,7 @@ private:
 
 	int stageHandle;
 
+	int notViewCount;
 
 public:
 	BasicObject(const int collStageHandle);
