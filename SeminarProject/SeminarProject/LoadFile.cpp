@@ -36,17 +36,7 @@ void LoadFile::MyLoad(const string path, int& file, const ELOADFILE type)
 		data[i] = (data[i] ^ rad);
 	}
 
-	if (type == ELOADFILE::fbxmodel)
-	{
-		//ï€ë∂
-		outstr = path;
-		outstr.erase(outstr.end() - 2, outstr.end());
-		outstr.append("bx");
-		ofstream fout(outstr.c_str(), ios::binary);
-		fout.write((char*)&data[0], size);
-		fout.close();
-	}
-	else if (type == ELOADFILE::mv1model)
+	if (type == ELOADFILE::mv1model)
 	{
 		//ï€ë∂
 		outstr = path;
@@ -65,12 +55,6 @@ void LoadFile::MyLoad(const string path, int& file, const ELOADFILE type)
 		break;
 	case ELOADFILE::soundmem:
 		file = LoadSoundMemByMemImage((char*)&data[0], size);
-		break;
-	case ELOADFILE::fbxmodel:
-		file = MV1LoadModel(outstr.c_str());
-
-		// àÍéûèoóÕÇµÇΩÇ‡ÇÃÇçÌèú
-		std::remove(outstr.c_str());
 		break;
 	case ELOADFILE::mv1model:
 		file = MV1LoadModel(outstr.c_str());
